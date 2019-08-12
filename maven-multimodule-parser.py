@@ -55,12 +55,29 @@ def graphviz():
     for key in allModules.keys():
         curNode = key.replace("-", '_')
         for mod in allModules[key]["modules"]:
-            res+=curNode + " -> " + mod.replace("-", '_') + " [color=\"blue\"];\n"
+            res += curNode + " -> " + mod.replace("-", '_') + " [color=\"blue\"];\n"
         for dep in allModules[key]["dependencies"]:
-            res+=curNode + " -> " + dep.replace("-", '_') + " [color=\"red\" overlap=scale];\n"
+            res += curNode + " -> " + dep.replace("-", '_') + " [color=\"red\" overlap=scale];\n"
     res+= "}"
-    return res;
+    return res
     
+def graphvizSubGraphs():
+    res = "digraph G {\n"
+    for key in allModules.keys():
+        res += key.replace("-", '_') + " [label= \""+key+"\"];\n"
+        if (allModules[key]["modules"]):
+            res += "subgraph cluster_" + key.replace("-", '_') + " {\n"
+            res += "\tlabel = \""+ key + "\";\n"
+            for mod in allModules[key]["modules"]:
+                res += "\t"+mod.replace("-", "_") + " [label= \""+mod+"\"];\n"
+            res += "}\n"
+    for key in allModules.keys():
+        curNode = key.replace("-", '_')
+        for dep in allModules[key]["dependencies"]:
+            res += curNode + " -> " + dep.replace("-", '_') + " [color=\"red\" overlap=scale];\n"
+
+    res += "}"
+    return res
 
 tailored = 'cloud_deploy\\tailored_crm_b2b_rt_hq'
 cam = 'cam'
@@ -72,9 +89,13 @@ with open('infos\\'+chosenPath.rsplit('\\', 1)[-1] + '.json', 'w') as file:
     json.dump(allModules, file)
 
 with open('infos\\'+chosenPath.rsplit('\\', 1)[-1] + '.gv', 'w') as file:
-    file.write(graphviz())
+   file.write(graphvizSubGraphs())
 
-#print(graphviz())
+#TODO добавить возможность для запуска из командной строки
+#TODO удалить adhoc-решения
+#TODO параметризация скрипта
+
+#print(graphvizSubGraphs())
     
 
 
